@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSTU STORE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"> 
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+            <h1>PSTU STORE</h1>
+        </div>
+        <nav class="nav">
+            <a href="#products">Товары</a>
+            <a href="#search">Поиск</a>
+            <a href="#about">О нас</a>
+            <a href="#support">Техподдержка</a>
+
+            <!-- Проверка авторизации пользователя -->
+            {% if user_authenticated %}
+                <!-- Если пользователь авторизован -->
+                <div class="user-menu">
+                    <img src="{{ user_avatar_url }}" alt="User Avatar" class="user-avatar">
+                    <h1>Баланс: {{ user.balance }} </h1>
+                    <div class="dropdown">
+                        <a href="{{ url_for('logout') }}">Выйти</a>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Если пользователь не авторизован -->
+                <form method="POST" action="/auth">
+                    <button type="submit">Авторизоваться</button>
+                </form>
+            {% endif %}
+        </nav>
+    </header>
+    <div class="main-content">
+        <aside class="sidebar">
+            <div class="filter-section">
+                <h3>Поиск</h3>
+                <input type="text" placeholder="Поиск по названию">
+            </div>
+            <div class="filter-section">
+                <h3>Сортировка</h3>
+                <select>
+                    <option value="asc">По возрастанию цены</option>
+                    <option value="desc">По убыванию цены</option>
+                </select>
+            </div>
+            <div class="filter-section">
+                <h3>Фильтры</h3>
+                <label><input type="checkbox"> Процессоры</label><br>
+                <label><input type="checkbox"> Видеокарты</label><br>
+                <label><input type="checkbox"> Корпуса</label><br>
+                <label><input type="checkbox"> Материнские платы</label>
+            </div>
+        </aside>
+        <div class="content">
+            {% for product in products %}
+            <div class="product-card">
+                <h3>{{ product.name }}</h3>
+                <p>{{ product.description }}</p>
+                <p><strong>Цена:</strong> {{ product.price }} руб.</p>
+                <p><strong>Количество:</strong> {{ product.quantity }}</p>
+                {% if product.quantity > 0 %}
+                <form method="POST" action="/buy">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <button class="buy-button" type="submit">Купить</button>
+                </form>
+                {% else %}
+                    <span class="out-of-stock">Нет в наличии</span>
+                {% endif %}
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width:200px;">
+                {% endif %}       
+            </div>
+            {% endfor %}
+        </div>  
+    </div>
+
+    <!-- Стили для аватарки и выпадающего меню -->
+    <style>
+        .user-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .dropdown a {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+        }
+        .dropdown a:hover {
+            background-color: #f3f4f6;
+        }
+        .user-menu:hover .dropdown {
+            display: block;
+        }
+        .buy-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 15px auto 0;
+            transition: background-color 0.3s, transform 0.2s ease;
+        }
+
+        .buy-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .buy-button:active {
+            transform: scale(0.95);
+        }
+        .out-of-stock {
+            display: inline-block;
+            padding: 10px;
+            font-size: 1rem;
+            color: white;
+            background-color: #f44336;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</body>
+</html>
